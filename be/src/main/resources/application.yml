@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+#develope
+frontendDomain : "http://localhost:3000"
+dbDomain : "mysql://localhost:3306"
+dbUser: "root"
+dbPassword: "1234"
+
+#deploye
+#frontendDomain : "http://localhost:3000"
+#dbDomain : "mysql://localhost:3306"
+#dbUser: "root"
+#dbPassword: "1234"
+
+spring:
+  datasource:
+    url: jdbc:${dbDomain}/portfolio?useSSL=false&autoReconnect=true&useUnicode=true&characterEncoding=utf-8&severTimezone=Asia/seoul
+    username: ${dbUser}
+    password: ${dbPassword}
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+jwt:
+  issuer: portfolio
+  secret_key: sercretportfoliokey
