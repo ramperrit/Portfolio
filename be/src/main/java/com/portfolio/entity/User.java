@@ -19,7 +19,7 @@ import java.util.Collection;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class User implements UserDetails {
+public class User  extends BaseEntity implements UserDetails{
     @Id
     @GeneratedValue
     private Long uno;

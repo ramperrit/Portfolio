@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "../css/styles.css";
-import { LOGIN, MAIN } from "./page_constants";
+import { LOGIN, MAIN, MANAGE, UPLOAD } from "./page_constants";
 import Logout from "./Logout";
 
 export default function Header({...props}) {
@@ -9,6 +9,7 @@ export default function Header({...props}) {
 
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem("access_token"));
+    setAuthority(localStorage.getItem("authority"));
   },[]);
 
   return (
@@ -24,8 +25,8 @@ export default function Header({...props}) {
               }
               {isLoggedIn && authority === "ROLE_ADMIN" &&
               <>
-                <li class="nav-item"><a class="nav-link" href={LOGIN}>Upload</a></li>
-                <li class="nav-item"><a class="nav-link" href={LOGIN}>Manage</a></li>
+                <li class="nav-item"><a class="nav-link" href={UPLOAD}>Upload</a></li>
+                <li class="nav-item"><a class="nav-link" href={MANAGE}>Manage</a></li>
               </>
               }
             </ul>
