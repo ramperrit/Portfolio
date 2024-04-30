@@ -7,7 +7,7 @@ import { LOGIN } from "../constants/page_constants";
 import Paging from "../constants/Paging";
 
 export default function Listpage() {
-  const [items, setItems] = useState("");
+  const [items, setItems] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
   const [maxPageNum, setMaxPageNum] = useState(0);
   const [pageNum, setPageNum] = useState(0);
@@ -91,10 +91,10 @@ function Item({item}){
     <tr>
       <td>{item.id}</td>
       <td>
-        {item.bTitle}
+        {item.btitle}
       </td>
-      <td>{item.regDate}</td>
-      <td>{item.updateDate}</td>
+      <td>{item.regTime}</td>
+      <td>{item.updateTime}</td>
     </tr>
   )
 }
