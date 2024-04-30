@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../constants/Header";
 import axios from "axios";
 import { UPLOAD_API } from "../constants/api_constants";
 import { useNavigate } from "react-router-dom";
-import { LIST } from "../constants/page_constants";
+import { LIST, PAGE_403 } from "../constants/page_constants";
+import fetcher from "../fetcher";
 
 export default function UploadPage() {
   const [bTitle, setBTitle] = useState("");
@@ -13,16 +14,15 @@ export default function UploadPage() {
   const [bText, setBText] = useState("");
   const [bStack, setBStack] = useState("");
   const [bDetail, setBDetail] = useState("");
-  const [file, setFile] = useState([]);
-  const [error, setError] = useState("");
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+  const [boardImgFileList, setboardImgFileList]=useState([]);
+
   const navigate = useNavigate();
 
   const uploadHandler = async (e) => {
-    e.preventDefault();
-
     try{
       const formData = new FormData();
+      
       formData.append("bTitle", bTitle);
       formData.append("bName", bName);
       formData.append("bNumber", bNumber);
@@ -31,40 +31,31 @@ export default function UploadPage() {
       formData.append("bStack", bStack);
       formData.append("bDetail", bDetail);
 
-      file.map((f) => {
-        formData.append("boardImgFile", f);
-      });
+      for(let i=0; i<boardImgFileList.length; i++){
+        formData.append("boardImgFileList", boardImgFileList[i]);
+      }
 
+      const response = await fetcher.post(UPLOAD_API, formData);
 
-      // formData.append("boardImgFile", file);
-
-      console.log(bDetail);
-      console.log(file);
-
-      const response = await axios.post(
-        API_BASE_URL + UPLOAD_API,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }    
-      )
-
-      console.log(response.data);
+      alert(response.data);
 
       navigate(LIST);
       
     }catch(error){
-      console.error(error);
-      setError("Upload Fail");
+      alert(error.response.data);
     }
   }
 
-  const handleChange = (e) =>{
-    setFile(Array.from(e.target.files || []));
-  }
+  useEffect(()=>{
+    if(localStorage.getItem("authority" !== "ROLE_ADMIN")){
+      navigate(PAGE_403);
+    }
+  })
 
+
+  const attach = (target) => {
+    setboardImgFileList(prev => [...prev, target.files[0]]);
+  }
 
   return (
     <>
@@ -108,8 +99,10 @@ export default function UploadPage() {
                   <textarea class="form-control" id="bDetail" type="text" placeholder="Detail..." style={{ height: 200 }} required value={bDetail} onChange={(e) => setBDetail(e.target.value)} ></textarea>
                   <label for="bDetail">Detail</label>
                 </div>
-                <label>Profile Image</label>
-                <input class="form-control" id="boardImgFile" type="file" required multiple onChange={handleChange} ></input>
+                <label>Images</label>
+                {Array(3).fill(0).map((_, index) =>
+                <input class="form-control" key={index} type="file" onChange={(e)=>attach(e.target)} ></input>
+              )}
 
 
                 <br/>

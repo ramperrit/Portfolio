@@ -32,7 +32,7 @@ fetcher.interceptors.response.use(
 
       //사용자에게 안보이게 처리
       const accessToken = localStorage.getItem("access_token");
-      error.config.headers['Authentication'] = 'Bearer ${accessToken}';
+      error.config.headers['Authentication'] = `Bearer ${accessToken}`;
       const response = await axios.request(error.config);
       return response;
     }

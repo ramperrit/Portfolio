@@ -1,10 +1,12 @@
 package com.portfolio.jwt;
 
 import com.portfolio.entity.User;
+import com.portfolio.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +28,7 @@ public class TokenProvider {
     private static final String AUTHORITIES_KEY = "auth";
 
     private final JwtProperties jwtProperties;
+    private final UserRepository userRepository;
 
     public String createAccessToken(User user, Duration expiredAt){
         Date now = new Date();
@@ -37,7 +40,7 @@ public class TokenProvider {
                 .setIssuer(jwtProperties.getIssuer())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .setSubject(user.getEmail())
+                .setSubject(user.getId())
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
                 .compact();
@@ -81,20 +84,32 @@ public class TokenProvider {
         if(claims.get(AUTHORITIES_KEY) == null){
             throw new RuntimeException("권한 없는 토큰");
         }
-        String userId = claims.getSubject();
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+        User user = userRepository.findById(claims.getSubject());
+        if(user != null){
+            Collection<? extends GrantedAuthority> authorities =
+                    Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
+            return new UsernamePasswordAuthenticationToken(user, token, authorities);
+        }else {
+            throw new EntityNotFoundException();
+        }
 
-        //유저정보를 담은 토큰
-        return new UsernamePasswordAuthenticationToken(
-                new org.springframework.security.core.userdetails.User(
-                        "", "", authorities
-                ),
-                token,
-                authorities
-        );
+
+//        String userId = claims.getSubject();
+//        Collection<? extends GrantedAuthority> authorities =
+//                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+//                        .map(SimpleGrantedAuthority::new)
+//                        .collect(Collectors.toList());
+//
+//        //유저정보를 담은 토큰
+//        return new UsernamePasswordAuthenticationToken(
+//                new org.springframework.security.core.userdetails.User(
+//                        "", "", authorities
+//                ),
+//                token,
+//                authorities
+//        );
     }
 
 
